@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+        .stepper {
+            list-style: none;
+            padding: 0;
+        }
+
+        .step {
+            padding: 20px;
+            border-left: 3px solid #e9ecef;
+            transition: border-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .step.active {
+            border-left-color: var(--primary-color);
+        }
+
+        .step.completed {
+            border-left-color: var(--success-color);
+        }
+
+        .step h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .step .step-number {
+            background-color: #e9ecef;
+            color: var(--secondary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .step.active .step-number {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .step button i {
+            margin-right: 8px;
+        }
+
+        #decodedText {
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: var(--border-radius);
+            font-family: monospace;
+            font-size: 1.2rem;
+            min-height: 50px;
+            white-space: pre-wrap;
+        }
+    </style>
+
+    <div class="card">
+        <h2><i class="fa-duotone fa-ear-listen"></i> Musik zu Text (Decodierung)</h2>
+        <p>Folge diesen drei Schritten, um das Audiosignal wieder in Text zurückzuverwandeln.</p>
+
+        <ol class="stepper">
+            <li id="step1" class="step active">
+                <h3><span class="step-number">1</span> Kalibrierung</h3>
+                <p>Sorge für eine ruhige Umgebung und klicke dann auf den Button, um das Rauschprofil deines Mikrofons
+                    für 2 Sekunden aufzunehmen.</p>
+                <button id="calibrateButton" class="btn-warning"><i class="fa-solid fa-sliders"></i> Kalibrierung
+                    starten
+                </button>
+                <div id="status1" class="status-text" style="margin-top: 10px;"></div>
+            </li>
+
+            <li id="step2" class="step">
+                <h3><span class="step-number">2</span> Signalaufnahme</h3>
+                <p>Spiele nun die zuvor generierte Audiodatei ab. Starte die Aufnahme kurz vorher und stoppe sie kurz
+                    danach.</p>
+                <button id="startButton" class="btn-success" disabled><i class="fa-solid fa-microphone"></i> Aufnahme
+                    starten
+                </button>
+                <button id="stopButton" class="btn-danger" disabled><i class="fa-solid fa-stop"></i> Aufnahme stoppen
+                </button>
+                <div id="status2" class="status-text" style="margin-top: 10px;"></div>
+            </li>
+
+            <li id="step3" class="step">
+                <h3><span class="step-number">3</span> Decodierung</h3>
+                <p>Nun wird die Aufnahme zum Server geschickt und analysiert. Das Ergebnis erscheint unten.</p>
+                <button id="decodeButton" class="btn-primary" disabled><i class="fa-solid fa-wand-magic-sparkles"></i>
+                    Decodieren
+                </button>
+                <div id="status3" class="status-text" style="margin-top: 10px;"></div>
+            </li>
+        </ol>
+    </div>
+
+    <div class="card">
+        <h3><i class="fa-duotone fa-file-lines"></i> Erkanntes Ergebnis</h3>
+        <div id="decodedText">...</div>
+    </div>
+
+    <script>
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+
+        const calibrateButton = document.getElementById('calibrateButton');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const decodeButton = document.getElementById('decodeButton');
+
+        const status1 = document.getElementById('status1');
+        const status2 = document.getElementById('status2');
+        const status3 = document.getElementById('status3');
+
+        const decodedTextDiv = document.getElementById('decodedText');
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob;
+        let isCalibrating = false;
+
+        async function startGenericRecording(duration) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.start();
+
+                if (duration) {
+                    setTimeout(() => {
+                        if (mediaRecorder.state === "recording") {
+                            mediaRecorder.stop();
+                        }
+                    }, duration);
+                }
+
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
+                    if (isCalibrating) {
+                        handleCalibration();
+                    } else {
+                        step2.classList.remove('active');
+                        step2.classList.add('completed');
+                        step3.classList.add('active');
+                        status2.innerHTML = '<i class="fa-solid fa-check-circle" style="color: var(--success-color);"></i> Aufnahme abgeschlossen.';
+                        decodeButton.disabled = false;
+                        status3.textContent = 'Bereit zum Decodieren.';
+                    }
+                };
+
+            } catch (err) {
+                const errorMsg = 'Fehler: Mikrofonzugriff verweigert oder nicht möglich.';
+                if (isCalibrating) {
+                    status1.textContent = errorMsg;
+                    calibrateButton.disabled = false;
+                } else {
+                    status2.textContent = errorMsg;
+                    startButton.disabled = false;
+                }
+                console.error("Error accessing microphone:", err);
+            }
+        }
+
+        calibrateButton.addEventListener('click', () => {
+            isCalibrating = true;
+            calibrateButton.disabled = true;
+            status1.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kalibriere... Nehme 2 Sekunden Stille auf.';
+            startGenericRecording(2000);
+        });
+
+        async function handleCalibration() {
+            const formData = new FormData();
+            formData.append('audio_data', audioBlob, 'calibration.wav');
+            try {
+                const response = await fetch('/calibrate_noise_profile', {method: 'POST', body: formData});
+                if (!response.ok) throw new Error('Kalibrierung auf dem Server fehlgeschlagen.');
+
+                step1.classList.remove('active');
+                step1.classList.add('completed');
+                step2.classList.add('active');
+                status1.innerHTML = '<i class="fa-solid fa-check-circle" style="color: var(--success-color);"></i> Kalibrierung erfolgreich.';
+                startButton.disabled = false;
+                status2.textContent = 'Bereit für die Signal-Aufnahme.';
+
+            } catch (err) {
+                status1.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: var(--danger-color);"></i> Fehler bei der Kalibrierung: ${err.message}`;
+                calibrateButton.disabled = false;
+            }
+            isCalibrating = false;
+        }
+
+        startButton.addEventListener('click', () => {
+            isCalibrating = false;
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            decodeButton.disabled = true;
+            decodedTextDiv.textContent = '...';
+            status2.innerHTML = '<i class="fa-solid fa-microphone-lines fa-beat-fade"></i> Signal-Aufnahme läuft...';
+            startGenericRecording(null);
+        });
+
+        stopButton.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
+            stopButton.disabled = true;
+        });
+
+        decodeButton.addEventListener('click', async () => {
+            if (!audioBlob) {
+                alert("Bitte nimm zuerst das Signal auf.");
+                return;
+            }
+
+            status3.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Decodiere Audio... Bitte warten.';
+            decodeButton.disabled = true;
+
+            const formData = new FormData();
+            formData.append('audio_data', audioBlob, 'recording.wav');
+
+            try {
+                const response = await fetch('/decode_audio', {method: 'POST', body: formData});
+                if (!response.ok) throw new Error(`Server-Fehler: ${response.statusText}`);
+                const result = await response.json();
+
+                decodedTextDiv.textContent = result.decoded_text || "[Kein Text erkannt]";
+                status3.innerHTML = '<i class="fa-solid fa-check-circle" style="color: var(--success-color);"></i> Decodierung abgeschlossen.';
+                step3.classList.add('completed');
+                calibrateButton.disabled = false;
+
+            } catch (err) {
+                status3.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: var(--danger-color);"></i> Fehler beim Decodieren: ${err.message}`;
+                decodeButton.disabled = false;
+            }
+        });
+    </script>
+{% endblock %}

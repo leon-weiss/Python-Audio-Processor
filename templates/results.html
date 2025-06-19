@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+        h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .result-section {
+            margin-bottom: 40px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .warning {
+            background-color: #fff3cd;
+            border-left: 6px solid #ffc107;
+            padding: 1px 15px;
+            margin-top: 20px;
+        }
+    </style>
+
+    <h2>Ergebnis der Audio-Generierung</h2>
+
+    <div class="warning">
+        <p><b>Hinweis:</b> Die erzeugte Audiodatei wird nach 15 Minuten automatisch vom Server gelöscht. Lade sie bei
+            Bedarf vorher herunter.</p>
+    </div>
+
+    <div class="result-section">
+        <h3>1. Erzeugte Audiodatei</h3>
+        <p>Hier ist dein generierter Klang. Du kannst ihn direkt abspielen oder herunterladen.</p>
+        <audio controls src="{{ url_for('static', filename=wav_file) }}">
+            Dein Browser unterstützt das Audio-Element nicht.
+        </audio>
+        <p><a href="{{ url_for('static', filename=wav_file) }}" download>WAV-Datei herunterladen</a></p>
+    </div>
+
+    <div class="result-section">
+        <h3>2. Wellenform-Analyse (Zeit)</h3>
+        <p>Dieser Graph zeigt die Amplitude des Signals über die Zeit.</p>
+        <img src="data:image/png;base64,{{ waveform_plot_b64 }}" alt="Wellenform-Graph">
+    </div>
+
+    <div class="result-section">
+        <h3>3. Frequenz-Analyse (DFT)</h3>
+        <p>Dieser Graph zeigt, aus welchen Grund- und Obertönen sich der Klang zusammensetzt.</p>
+        <img src="data:image/png;base64,{{ dft_plot_b64 }}" alt="DFT-Graph">
+    </div>
+
+    <a href="/" class="back-link">Neue Analyse starten</a>
+
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-box">
+            <i class="fa-solid fa-cogs"></i>
+            <p>Generiere Audio & Graphen...</p>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .note-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .note-btn {
+            padding: 8px 12px;
+            font-size: 14px;
+            background-color: #e9ecef;
+            color: black;
+            border: 1px solid #ccc;
+            transition: background-color 0.2s;
+            font-weight: bold;
+        }
+
+        .note-btn.sharp {
+            background-color: var(--dark-color);
+            color: white;
+            border-color: #000;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .radio-group {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .radio-group label {
+            margin-left: 8px;
+            font-weight: normal;
+        }
+
+        .radio-group input {
+            margin: 0;
+        }
+    </style>
+
+    <div class="card">
+        <h2><i class="fa-duotone fa-piano"></i> Noten-Palette</h2>
+        <p>Klicke auf eine Note, um die Frequenz zur Eingabe hinzuzufügen.</p>
+        <div id="note-buttons" class="note-palette">
+            <button type="button" class="note-btn" data-freq="261.63">C</button>
+            <button type="button" class="note-btn sharp" data-freq="277.18">C♯</button>
+            <button type="button" class="note-btn" data-freq="293.66">D</button>
+            <button type="button" class="note-btn sharp" data-freq="311.13">D♯</button>
+            <button type="button" class="note-btn" data-freq="329.63">E</button>
+            <button type="button" class="note-btn" data-freq="349.23">F</button>
+            <button type="button" class="note-btn sharp" data-freq="369.99">F♯</button>
+            <button type="button" class="note-btn" data-freq="392.00">G</button>
+            <button type="button" class="note-btn sharp" data-freq="415.30">G♯</button>
+            <button type="button" class="note-btn" data-freq="440.00">A</button>
+            <button type="button" class="note-btn sharp" data-freq="466.16">A♯</button>
+            <button type="button" class="note-btn" data-freq="493.88">B</button>
+        </div>
+    </div>
+
+    <form id="generation-form" action="/generate" method="post">
+        <div class="card">
+            <h2><i class="fa-duotone fa-keyboard"></i> Klangerzeugung</h2>
+            <div class="form-group">
+                <label for="frequencies">Frequenzen (manuell oder per Klick):</label>
+                <textarea id="frequencies" name="frequencies" rows="3"
+                          placeholder="z.B. 440 oder 261.63, 329.63, 392.00"></textarea>
+            </div>
+
+            <h3 style="margin-top: 30px;">Generierungsart</h3>
+            <div class="radio-group">
+                <input type="radio" id="single" name="gen_type" value="single" checked>
+                <label for="single"><i class="fa-solid fa-music-note" style="margin-right: 5px;"></i> Einzelner
+                    Ton</label>
+            </div>
+            <div class="radio-group">
+                <input type="radio" id="scale" name="gen_type" value="scale">
+                <label for="scale"><i class="fa-solid fa-arrow-down-1-9" style="margin-right: 5px;"></i> Tonleiter
+                    (Nacheinander)</label>
+            </div>
+            <div class="radio-group">
+                <input type="radio" id="chord" name="gen_type" value="chord">
+                <label for="chord"><i class="fa-solid fa-bars-staggered" style="margin-right: 5px;"></i> Akkord
+                    (Arpeggio)</label>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem;">
+            <i class="fa-solid fa-cogs"></i> Audio generieren & analysieren
+        </button>
+    </form>
+
+    <div id="loader" class="loader-overlay" style="display:none;">
+    </div>
+
+    <script>
+        const freqTextarea = document.getElementById('frequencies');
+        const noteButtonContainer = document.getElementById('note-buttons');
+
+        noteButtonContainer.addEventListener('click', function (event) {
+            if (event.target.matches('.note-btn[data-freq]')) {
+                const freq = event.target.dataset.freq;
+                const currentText = freqTextarea.value.trim();
+
+                if (currentText === '') {
+                    freqTextarea.value = freq;
+                } else {
+                    if (currentText.endsWith(',')) {
+                        freqTextarea.value = currentText + ' ' + freq;
+                    } else {
+                        freqTextarea.value = currentText + ', ' + freq;
+                    }
+                }
+            }
+        });
+
+        const generationForm = document.getElementById('generation-form');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        generationForm.addEventListener('submit', function (event) {
+            if (document.getElementById('frequencies').value.trim() === '') {
+                alert("Bitte geben Sie mindestens eine Frequenz ein.");
+                event.preventDefault();
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            loadingOverlay.classList.add('visible');
+        });
+    </script>
+{% endblock %}

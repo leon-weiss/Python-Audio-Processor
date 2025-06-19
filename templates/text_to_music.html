@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+        textarea {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            font-size: 16px;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+
+    <div class="card">
+        <h2><i class="fa-duotone fa-text-to-speech"></i> Text zu Musik (Codierung)</h2>
+        <p>Gib einen Text ein. Jedes Zeichen wird in eine robuste Dual-Ton-Sequenz umgewandelt, die für die akustische
+            Übertragung optimiert ist.</p>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="user_text"><b>Dein Text:</b></label>
+                <textarea name="user_text" id="user_text" rows="4" placeholder="Hallo Welt"></textarea>
+            </div>
+            <button type="submit" class="btn-primary">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> In Töne umwandeln
+            </button>
+        </form>
+    </div>
+
+    {% if wav_file %}
+        <div class="card">
+            <h3><i class="fa-solid fa-file-audio"></i> Erzeugte Melodie</h3>
+            <p>Diese Audiodatei repräsentiert deinen Text. Spiele sie im nächsten Schritt ab, um sie zu decodieren.</p>
+            <audio controls autoplay src="{{ url_for('static', filename=wav_file) }}"></audio>
+        </div>
+    {% endif %}
+{% endblock %}

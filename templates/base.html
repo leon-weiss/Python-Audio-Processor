@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Leon Weiss">
+    <title>Python AudioLab</title>
+
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <script src="https://kit.fontawesome.com/476060008b.js" crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --border-color: #dee2e6;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family), sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            margin: 0;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        header {
+            background-color: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        header .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        header .logo .fa-wave-square {
+            color: var(--primary-color);
+        }
+
+        .navigation-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        nav.main-nav {
+            display: flex;
+            gap: 25px;
+        }
+
+        nav.main-nav a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+
+        nav.main-nav a:hover, nav.main-nav a.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        nav.main-nav a i {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+
+        nav.external-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        nav.external-links a {
+            color: var(--secondary-color);
+            font-size: 1.3rem;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        nav.external-links a:hover {
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .burger-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-color);
+        }
+
+        @media (max-width: 992px) {
+            .navigation-wrapper {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 300px;
+                height: 100vh;
+                background-color: white;
+                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0;
+                padding: 30px;
+
+                transform: translateX(100%);
+                transition: transform 0.3s ease-in-out;
+                z-index: 100;
+            }
+
+            .navigation-wrapper.is-open {
+                transform: translateX(0);
+            }
+
+            nav.main-nav {
+                flex-direction: column;
+                width: 100%;
+                gap: 5px;
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+            }
+
+            nav.main-nav a {
+                font-size: 1.1rem;
+                padding: 10px 0;
+            }
+
+            nav.external-links {
+                padding-top: 10px;
+            }
+
+            .burger-menu-button {
+                display: block;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            background-color: #ffffff;
+            border-top: 1px solid var(--border-color);
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            border: 1px solid #dee2e6;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h2 {
+            margin-top: 0;
+        }
+
+        .card h2 i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        button {
+            font-family: var(--font-family), sans-serif;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 500;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: black;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .flash-messages {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+        }
+
+        .flash-messages li {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+        }
+
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-box {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading-box .fa-cogs {
+            font-size: 3rem;
+            color: var(--primary-color);
+            animation: spin 2s linear infinite;
+        }
+
+        .loading-box p {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-top: 20px;
+        }
+
+        .progress-bar-container {
+            width: 300px;
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+        }
+
+        .loading-overlay.visible .progress-bar {
+            animation: progress-animation 8s ease-out forwards;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes progress-animation {
+            0% {
+                width: 0%;
+            }
+            90% {
+                width: 95%;
+            }
+            100% {
+                width: 98%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <i class="fa-solid fa-wave-square"></i>
+        AudioLab
+    </div>
+    <div class="navigation-wrapper" id="navigationWrapper">
+        <nav class="main-nav">
+            <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">
+                <i class="fa-solid fa-sliders"></i> Synthesizer
+            </a>
+            <a href="{{ url_for('text_to_music') }}"
+               class="{{ 'active' if request.endpoint == 'text_to_music' else '' }}">
+                <i class="fa-solid fa-phone-volume"></i> Text zu Musik
+            </a>
+            <a href="{{ url_for('music_to_text') }}"
+               class="{{ 'active' if request.endpoint == 'music_to_text' else '' }}">
+                <i class="fa-solid fa-ear-listen"></i> Musik zu Text
+            </a>
+        </nav>
+        <nav class="external-links">
+            <a href="https://github.com/leon-weiss/Python-Audio-Processor" target="_blank"
+               title="Projekt auf GitHub ansehen">
+                <i class="fa-brands fa-github"></i>
+            </a>
+            <a href="{{ url_for('static', filename='Audio.pdf') }}" target="_blank" title="Präsentation herunterladen">
+                <i class="fa-solid fa-file-arrow-down"></i>
+            </a>
+        </nav>
+    </div>
+    <button class="burger-menu-button" id="burgerMenuButton" aria-label="Navigation umschalten">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+</header>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flash-messages">
+                {% for category, message in messages %}
+                    <li class="flash-{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<footer>
+    Made with <i class="fa-solid fa-heart" style="color: #e44d26;"></i> in 2025 by Leon Weiss.
+</footer>
+
+<script type="text/javascript">
+    const burgerMenuButton = document.getElementById('burgerMenuButton');
+    const navigationWrapper = document.getElementById('navigationWrapper');
+
+    burgerMenuButton.addEventListener('click', function () {
+        navigationWrapper.classList.toggle('is-open');
+    });
+
+    document.addEventListener('click', function (event) {
+        const isClickInsideNav = navigationWrapper.contains(event.target);
+        const isClickOnBurger = burgerMenuButton.contains(event.target);
+
+        if (!isClickInsideNav && !isClickOnBurger && navigationWrapper.classList.contains('is-open')) {
+            navigationWrapper.classList.remove('is-open');
+        }
+    });
+</script>
+</body>
+</html>
