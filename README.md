@@ -40,8 +40,8 @@ Stellen Sie sicher, dass die folgenden Werkzeuge auf Ihrem System installiert si
 
 1.  **Repository klonen**
     ```sh
-    git clone [https://github.com/dein-name/dein-repo.git](https://github.com/dein-name/dein-repo.git)
-    cd dein-repo
+    git clone [https://github.com/leon-weiss/Python-Audio-Processor](https://github.com/leon-weiss/Python-Audio-Processor.git)
+    cd Python-Audio-Processor
     ```
 
 2.  **Virtuelle Umgebung erstellen und aktivieren**
