@@ -40,7 +40,7 @@ Stellen Sie sicher, dass die folgenden Werkzeuge auf Ihrem System installiert si
 
 1.  **Repository klonen**
     ```sh
-    git clone [https://github.com/leon-weiss/Python-Audio-Processor](https://github.com/leon-weiss/Python-Audio-Processor.git)
+    git clone git@github.com:leon-weiss/Python-Audio-Processor.git
     cd Python-Audio-Processor
     ```
 
