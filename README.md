@@ -47,14 +47,19 @@ Stelle sicher, dass die folgenden Werkzeuge auf deinem System installiert sind:
     -   **Linux (Debian/Ubuntu):** `sudo apt update && sudo apt install ffmpeg`
 
 ### Installation
+1. **Bei Bedarf Voraussetzungen installieren**
+```sh
+sudo apt update
+sudo apt install python3-venv python3-pip
+```
 
-1.  **Repository klonen**
+2.  **Repository klonen**
     ```sh
     git clone https://github.com/leon-weiss/Python-Audio-Processor.git
     cd Python-Audio-Processor
     ```
 
-2.  **Virtuelle Umgebung erstellen und aktivieren**
+3.  **Virtuelle Umgebung erstellen und aktivieren**
     ```sh
     python -m venv .venv
     # Windows
@@ -63,7 +68,7 @@ Stelle sicher, dass die folgenden Werkzeuge auf deinem System installiert sind:
     source .venv/bin/activate
     ```
 
-3.  **Abhängigkeiten installieren**
+4.  **Abhängigkeiten installieren**
     ```sh
     pip install -r requirements.txt
     ```
@@ -74,7 +79,7 @@ Starte die Flask-Anwendung:
 ```sh
 python app.py
 ```
-Öffne deinen Browser und navigiere zu `http://127.0.0.1:5000`.
+Öffne deinen Browser und navigiere zu `http://localhost:5000`.
 
 ## Benutzung
 
