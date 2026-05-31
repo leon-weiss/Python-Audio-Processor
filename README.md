@@ -1,8 +1,10 @@
 # Python Audio-Processing Web-Anwendung
 
+## Dieses Projekt wird nicht mehr weiterentwickelt. Falls du Interesse daran hast, die Entwicklung weiterzuführen, kannst du einfach einen fork dieses Repository erstellen.
+
 Eine interaktive Web-Anwendung zur Demonstration von digitaler Signalverarbeitung, gebaut mit Python, Flask und NumPy. Das Projekt ermöglicht die Synthese von Klängen, die Codierung von Text in ein robustes Audiosignal und die anschließende Decodierung zurück in Text mittels Mikrofonaufnahme und FFT-Analyse.
 
-[![Live-Demo](https://img.shields.io/badge/Live--Demo-Online-brightgreen)](https://leons-audio.de)
+![Live-Demo](https://img.shields.io/badge/Live--Demo-Offline-lightgrey)
 ![Python Version](https://img.shields.io/badge/python-3.12+-blue)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
@@ -25,11 +27,9 @@ Eine interaktive Web-Anwendung zur Demonstration von digitaler Signalverarbeitun
         -   Decodierung der Bits basierend auf den normalisierten Frequenz-Scores (Signal vs. Rauschprofil).
         -   Rückumwandlung der erkannten Binärsequenz in Text.
 
-## 🚀 Live-Demo
+## 🚀 Live-Demo (Offline)
 
-Keine Lust auf eine lokale Installation? Du kannst das gesamte Projekt direkt auf **[leons-audio.de](https://leons-audio.de)** ausprobieren!
-
-> **[https://leons-audio.de](https://leons-audio.de)**
+Die Live-Demo ist nicht mehr online. 
 
 ## Getting Started
 
